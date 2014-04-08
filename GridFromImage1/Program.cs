@@ -32,35 +32,13 @@ namespace GridFromImage
             Pen pen = new Pen(Color.Green);
 
             Grid grid = new Grid();
-            grid.Width = gridWidth;
-            grid.Height = gridHeight;
+            grid.initDiffs(gridHeight, gridWidth, DataNodeType.Normal);
             grid.setOriginalImageSize(baseImg.Width, baseImg.Height);
-            //画线
-            Point[,] points = grid.HorizontalLines();
-            for(int i = 0; i < points.GetLength(0); i++)
-            {
-                g.DrawLine(pen, points[i,0],points[i,1]);
-            }
-            points = grid.VerticalLines();
-            for (int i = 0; i < points.GetLength(0); i++)
-            {
-                g.DrawLine(pen, points[i, 0], points[i, 1]);
-            }
-            //画个半透明矩形从而清楚的看出来哪些是不能通过的
-            Rectangle[,] rects = grid.Grids;
-            for (int i = 0; i < rects.GetLength(0); i++)
-            {
-                for (int j = 0; j < rects.GetLength(1); j++)
-                {
-                    Rectangle rect = rects[i, j];
-                    bool marked = markAsDifferent(diff, rect, grid, i, j);
-                    if (marked)
-                    {
-                        Brush trasparentBrush = new SolidBrush(Color.FromArgb(0x80, Color.Red));
-                        g.FillRectangle(trasparentBrush, rect);
-                    }
-                }
-            }
+
+            grid.drawGrids(g, pen);
+
+            grid.generateDiffFromImage(diff);
+            grid.drawBlockInfo(g, new Font("Verdana", 10));
 
             string fullPath = Path.GetFullPath(baseFile);
             string path = Path.GetDirectoryName(fullPath);

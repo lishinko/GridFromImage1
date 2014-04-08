@@ -19,7 +19,7 @@ namespace GridFromImage
         RightDown = '3',
         RightUp = '9',
     }
-    public class Grid //: IEnumerable<Point>
+    public class Grid 
     {
         //不知道为什么，上面的enum写的类型不能被打印出来。我们还是弄个map吧.
         Dictionary<DataNodeType, char> nodeTypeStrings = new Dictionary<DataNodeType, char>(){
@@ -34,18 +34,15 @@ namespace GridFromImage
             {DataNodeType.RightDown, '3'},
             {DataNodeType.RightUp, '9'},
         };
-        public int Width { get; set; }
-        public int Height { get; set; }
-        protected Rectangle[,] grids;
-        protected DataNodeType[,] diffs;
+        
 
         public void setOriginalImageSize(int imgWidth, int imgHeight)
         {
             this.imgWidth = imgWidth;
             this.imgHeight = imgHeight;
             grids = getGrids();
-            initDiffs(grids.GetLength(0), grids.GetLength(1), DataNodeType.Block);
         }
+
         public void markAsDifferentXY(int gridx, int gridy)
         {
             diffs[gridy, gridx] = DataNodeType.Block;
@@ -54,8 +51,48 @@ namespace GridFromImage
         {
             diffs[gridi, gridj] = DataNodeType.Block;
         }
-        protected void initDiffs(int height, int width, DataNodeType defaultType)
+        public void generateDiffFromImage(Bitmap img)
         {
+            //画个半透明矩形从而清楚的看出来哪些是不能通过的
+            Rectangle[,] rects = Grids;
+            for (int i = 0; i < rects.GetLength(0); i++)
+            {
+                for (int j = 0; j < rects.GetLength(1); j++)
+                {
+                    Rectangle rect = rects[i, j];
+                    bool marked = markAsDifferent(img, rect, i, j);
+                }
+            }
+        }
+        protected bool markAsDifferent(Bitmap img, Rectangle rect, int i, int j)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.Left; x < rect.Right; x++)
+                {
+                    Color color = img.GetPixel(x, y);
+                    if (color.ToArgb() == Color.Red.ToArgb())
+                    {
+                        markAsDifferentIJ(i, j);//默认的i,j和x,y是反着的，
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public DataNodeType getNodeType(int x, int y)
+        {
+            return diffs[y, x];
+        }
+        public char getNodeTypeString(int x, int y)
+        {
+            return nodeTypeStrings[diffs[y, x]];
+        }
+        public void initDiffs(int height, int width, DataNodeType defaultType)
+        {
+            Width = width;
+            Height = height;
             diffs = new DataNodeType[height, width];
             for (int y = 0; y < height; y++)
             {
@@ -144,21 +181,6 @@ namespace GridFromImage
             expandTo(x + 1, y, DataNodeType.Block, newData);//右
             expandTo(x + 1, y + 1, DataNodeType.Block, newData);//右下
         }
-        //public Point[,] Lines {get{
-        //    int[,] ret = new int[Width-1, Height-1];//边缘不需要画线，所以，线的数量要少一圈
-        //    double curGridRight = 0.0;
-        //    double curGridBottom = 0.0;
-        //    for (int i = 0; i < ret.GetLength(0); i++)
-        //    {
-        //        curGridBottom += rectHeight;
-        //        for (int j = 0; j < ret.GetLength(1); j++)
-        //        {
-        //            curGridRight += rectWidth;
-        //            ret[i, j] = new Point(curGridRight, curGridBottom);
-        //        }
-        //    }
-        //    return ret;
-        //}}
         public Rectangle[,] Grids
         {
             get
@@ -215,32 +237,52 @@ namespace GridFromImage
             return points;
 
         }
+        public void drawBlockInfo(Graphics g, Font font)
+        {
+            //画个半透明矩形从而清楚的看出来哪些是不能通过的
+            Rectangle[,] rects = Grids;
+            for (int i = 0; i < rects.GetLength(0); i++)
+            {
+                for (int j = 0; j < rects.GetLength(1); j++)
+                {
+                    Rectangle rect = rects[i, j];
+                    GridFromImage.DataNodeType nodeType = getNodeType(j, i);
+                    bool marked = nodeType != DataNodeType.Normal;//markAsDifferent(diff, rect, grid, i, j);
+                    if (marked)
+                    {
+                        Brush trasparentBrush = new SolidBrush(Color.FromArgb(0x80, Color.Red));
+                        Brush fontBrush = new SolidBrush(Color.LawnGreen);
+                        g.FillRectangle(trasparentBrush, rect);
+                        string s;
+                        s = String.Format("{0}", getNodeTypeString(j, i));
+                        g.DrawString(s, font, fontBrush, (float)rect.Left, (float)rect.Top);
+                    }
+                }
+            }
+        }
+        public void drawGrids(Graphics g, Pen pen)
+        {
+            //画线
+            Point[,] points = HorizontalLines();
+            for (int i = 0; i < points.GetLength(0); i++)
+            {
+                g.DrawLine(pen, points[i, 0], points[i, 1]);
+            }
+            points = VerticalLines();
+            for (int i = 0; i < points.GetLength(0); i++)
+            {
+                g.DrawLine(pen, points[i, 0], points[i, 1]);
+            }
+        }
 
-        //public IEnumerator<Point> GetEnumerator(){}
         protected int imgWidth;
         protected int imgHeight;
 
-        //protected class GridLinesEnumerator : IEnumerator<Point>
-        //{
-        //    protected int curWidth = 0;
-        //    protected int curHeight = 0;
-        //    protected int[,] grid;
-        //    GridLinesEnumerator(int[,] grid) { this.grid = grid; }
-        //    #region 枚举接口实现
-        //    public object Current { get {
-        //        if (curWidth < grid.GetLength(1) - 1)
-        //        {
-        //            curWidth++;
-        //        }
-        //        else
-        //        {
-        //            curHeight++;
-        //            curWidth = 0;
-        //        }
-        //        return grid[curHeight, curWidth]; 
-        //    } }
-        //    #endregion
-        //}
+        public int Width { get; set; }
+        public int Height { get; set; }
+        protected Rectangle[,] grids;
+        protected DataNodeType[,] diffs;
+
 
     }
 }
