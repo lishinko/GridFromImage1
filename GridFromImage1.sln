@@ -2,6 +2,13 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C# Express 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridFromImage1", "GridFromImage1\GridFromImage1.csproj", "{1E852654-02EB-47EE-949F-B6595006284E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B40818D-27D3-4A0E-991D-8056ADB91242} = {5B40818D-27D3-4A0E-991D-8056ADB91242}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Grid", "Grid\Grid.csproj", "{5B40818D-27D3-4A0E-991D-8056ADB91242}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "expandImg", "expandImg\expandImg.csproj", "{C3A20D9F-2A6F-44CC-B94A-20DE02FF8325}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +20,14 @@ Global
 		{1E852654-02EB-47EE-949F-B6595006284E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E852654-02EB-47EE-949F-B6595006284E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E852654-02EB-47EE-949F-B6595006284E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B40818D-27D3-4A0E-991D-8056ADB91242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B40818D-27D3-4A0E-991D-8056ADB91242}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B40818D-27D3-4A0E-991D-8056ADB91242}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B40818D-27D3-4A0E-991D-8056ADB91242}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3A20D9F-2A6F-44CC-B94A-20DE02FF8325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3A20D9F-2A6F-44CC-B94A-20DE02FF8325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3A20D9F-2A6F-44CC-B94A-20DE02FF8325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3A20D9F-2A6F-44CC-B94A-20DE02FF8325}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

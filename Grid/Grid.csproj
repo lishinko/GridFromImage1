@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1E852654-02EB-47EE-949F-B6595006284E}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{5B40818D-27D3-4A0E-991D-8056ADB91242}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GridFromImage</RootNamespace>
-    <AssemblyName>GridFromImage1</AssemblyName>
+    <RootNamespace>Grid</RootNamespace>
+    <AssemblyName>Grid</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,15 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ImageComparer.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Grid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Grid\Grid.csproj">
-      <Project>{5B40818D-27D3-4A0E-991D-8056ADB91242}</Project>
-      <Name>Grid</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,76 +6,143 @@ using System.Drawing;
 using System.IO;
 namespace GridFromImage
 {
-    class Grid //: IEnumerable<Point>
+    public enum DataNodeType
     {
+        Normal = ' ',
+        Block = '*',
+        Left = '4',
+        Right = '6',
+        Up = '8',
+        Down = '2',
+        LeftDown = '1',
+        LeftUp = '7',
+        RightDown = '3',
+        RightUp = '9',
+    }
+    public class Grid //: IEnumerable<Point>
+    {
+        //不知道为什么，上面的enum写的类型不能被打印出来。我们还是弄个map吧.
+        Dictionary<DataNodeType, char> nodeTypeStrings = new Dictionary<DataNodeType, char>(){
+            {DataNodeType.Normal, ' '},
+            {DataNodeType.Block, '*'},
+            {DataNodeType.Left, '4'},
+            {DataNodeType.Right, '6'},
+            {DataNodeType.Up, '8'},
+            {DataNodeType.Down, '2'},
+            {DataNodeType.LeftDown, '1'},
+            {DataNodeType.LeftUp, '7'},
+            {DataNodeType.RightDown, '3'},
+            {DataNodeType.RightUp, '9'},
+        };
         public int Width { get; set; }
         public int Height { get; set; }
         protected Rectangle[,] grids;
-        protected bool[,] diffs;
+        protected DataNodeType[,] diffs;
 
-        public void setOriginalImageSize(int imgWidth, int imgHeight) {
+        public void setOriginalImageSize(int imgWidth, int imgHeight)
+        {
             this.imgWidth = imgWidth;
             this.imgHeight = imgHeight;
             grids = getGrids();
-            diffs = new bool[grids.GetLength(0), grids.GetLength(1)];
+            initDiffs(grids.GetLength(0), grids.GetLength(1), DataNodeType.Block);
         }
-        public void markAsDifferentXY(int gridx, int gridy) {
-            diffs[gridy, gridx] = true;
+        public void markAsDifferentXY(int gridx, int gridy)
+        {
+            diffs[gridy, gridx] = DataNodeType.Block;
         }
         public void markAsDifferentIJ(int gridi, int gridj)
         {
-            diffs[gridi, gridj] = true;
+            diffs[gridi, gridj] = DataNodeType.Block;
+        }
+        protected void initDiffs(int height, int width, DataNodeType defaultType)
+        {
+            diffs = new DataNodeType[height, width];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    diffs[y, x] = DataNodeType.Normal;
+                }
+            }
         }
         public void saveDiffInfo(string path)
-        { 
-            using(StreamWriter fs = new StreamWriter(path))
+        {
+            using (StreamWriter fs = new StreamWriter(path))
             {
-                fs.WriteLine("{0} {1}", diffs.GetLength(0), diffs.GetLength(1));
+                fs.WriteLine("{0} {1}", diffs.GetLength(1), diffs.GetLength(0));
                 for (int i = 0; i < diffs.GetLength(0); i++)
                 {
                     for (int j = 0; j < diffs.GetLength(1); j++)
                     {
-                        if (diffs[i, j])
-                        {
-                            fs.Write("*");
-                        }
-                        else
-                        {
-                            fs.Write(" ");
-                        }
+                        char curDataType = nodeTypeStrings[diffs[i, j]];
+                        fs.Write(curDataType);
                     }
                     fs.Write(fs.NewLine);
                 }
             }
-            
+
         }
         public void loadDiffs(string path)
         {
             using (StreamReader fs = new StreamReader(path))
             {
-                fs.WriteLine("{0} {1}", diffs.GetLength(0), diffs.GetLength(1));
                 string widthHeight = fs.ReadLine();
-                string ss = widthHeight.Split(" ");
+                string[] ss = widthHeight.Split(' ');
                 int width = Int32.Parse(ss[0]);
                 int height = Int32.Parse(ss[1]);
-                diffs = new bool[width, height];
+                initDiffs(height, width, DataNodeType.Block);
 
-                for (int i = 0; i < height; i++)
+                for (int y = 0; y < height; y++)
                 {
                     string s = fs.ReadLine();
-                    for (int j = 0; j < width; j++)
+                    for (int x = 0; x < width; x++)
                     {
-                        if (s[i] == '*')
-                        {
-                            diffs[i, j] = true;
-                        }
-                        else
-                        {
-                            diffs[i, j] = false;
-                        }
+                        diffs[y, x] = (DataNodeType)s[x];
                     }
                 }
             }
+        }
+        public void expandDiffs()
+        {
+            if (diffs == null)
+            {
+                Console.WriteLine("no diff info!");
+                return;
+            }
+            for (int y = 0; y < diffs.GetLength(0); y++)
+            {
+                for (int x = 0; x < diffs.GetLength(1); x++)
+                {
+                    if (diffs[y, x] != DataNodeType.Block && diffs[y, x] != DataNodeType.Normal)//如果该点包含不是block的其它block，那么就扩展下，覆盖和它相连的其他block
+                    {
+                        expand(x, y, diffs[y, x]);
+                    }
+                }
+            }
+        }
+        protected void expand(int x, int y, DataNodeType newData)
+        {
+            System.Diagnostics.Debug.Assert(diffs[y, x] == newData);
+            expandToNeighbours(x, y, newData);
+        }
+        protected void expandTo(int x, int y, DataNodeType oldData, DataNodeType newData)
+        {
+            if (x >= 0 && y >= 0 && y < diffs.GetLength(0) && x < diffs.GetLength(1) && diffs[y, x] == oldData)
+            {
+                diffs[y, x] = newData;
+                expandToNeighbours(x, y, newData);
+            }
+        }
+        protected void expandToNeighbours(int x, int y, DataNodeType newData)
+        {
+            expandTo(x - 1, y - 1, DataNodeType.Block, newData);//左上
+            expandTo(x - 1, y, DataNodeType.Block, newData);//左
+            expandTo(x - 1, y + 1, DataNodeType.Block, newData);//左下
+            expandTo(x, y - 1, DataNodeType.Block, newData);//上
+            expandTo(x, y + 1, DataNodeType.Block, newData);//下
+            expandTo(x + 1, y - 1, DataNodeType.Block, newData);//右上
+            expandTo(x + 1, y, DataNodeType.Block, newData);//右
+            expandTo(x + 1, y + 1, DataNodeType.Block, newData);//右下
         }
         //public Point[,] Lines {get{
         //    int[,] ret = new int[Width-1, Height-1];//边缘不需要画线，所以，线的数量要少一圈
@@ -122,7 +189,7 @@ namespace GridFromImage
         }
         public Point[,] HorizontalLines()
         {
-            Point[,] points = new Point[Width-1,2];
+            Point[,] points = new Point[Width - 1, 2];
             double curGridRight = 0.0;
             double rectWidth = (double)this.imgWidth / Width;
             for (int i = 0; i < points.GetLength(0); i++)
