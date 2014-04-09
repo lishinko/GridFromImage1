@@ -26,6 +26,7 @@ namespace GridFromImage
             Bitmap otherImg = new Bitmap(otherFile);
 
             ImageComparer im = new ImageComparer(baseImg, otherImg);
+            im.MaxColorDiff = 5;
             Bitmap diff = im.DiffImg;
 
             Graphics g = Graphics.FromImage(diff);
